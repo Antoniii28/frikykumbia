@@ -1,0 +1,1027 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Frikykumbia Experience</title>
+    <style>
+        :root {
+            --main-color: #ff00ff;
+            --secondary-color: #00ffff;
+            --text-glow: 0 0 15px var(--main-color), 0 0 30px var(--secondary-color);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            height: 100vh;
+            overflow: hidden;
+            font-family: 'Bebas Neue', 'Impact', sans-serif;
+            position: relative;
+            background: #000;
+        }
+        
+        .video-background {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: -1;
+            filter: brightness(0.3) contrast(1.3);
+            pointer-events: none;
+        }
+        
+        .content-wrapper {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+            padding: 20px;
+        }
+        
+        .header {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            z-index: 20;
+            position: relative;
+            width: 100%;
+            max-width: 1200px;
+        }
+        
+        .logo-container {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            margin-bottom: 10px;
+        }
+        
+        .logo {
+            width: 300px;
+            height: 300px;
+            object-fit: contain;
+            filter: drop-shadow(0 0 20px var(--main-color));
+            transform-origin: center;
+            transition: all 0.2s ease;
+        }
+        
+        .title-container {
+            text-align: center;
+            width: 100%;
+            margin-top: 10px;
+        }
+        
+        .title {
+            font-size: 5vw;
+            font-weight: bold;
+            background: linear-gradient(45deg, var(--main-color), var(--secondary-color), #ffff00);
+            background-size: 200% 200%;
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: #00c8ff;
+            text-shadow: var(--text-glow);
+            display: inline-block;
+            letter-spacing: 3px;
+            line-height: 1;
+            margin: 0;
+            padding: 0 20px;
+            position: relative;
+            animation: gradientShift 8s ease infinite;
+        }
+        
+        .title::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            right: 0;
+            bottom: -10px;
+            height: 5px;
+            background: linear-gradient(90deg, var(--main-color), var(--secondary-color));
+            border-radius: 5px;
+            filter: drop-shadow(0 0 5px var(--main-color));
+        }
+        
+        .subtitle {
+            margin-top: 10px;
+            color: #fff;
+            font-size: 2vw;
+            opacity: 0;
+            text-shadow: var(--text-glow);
+            font-weight: bold;
+            letter-spacing: 1px;
+            transition: opacity 0.8s ease-out;
+        }
+        
+        .song-info {
+            margin-top: 10px;
+            color: #fff;
+            font-size: 1.5vw;
+            opacity: 0.8;
+            text-shadow: 0 0 5px var(--main-color);
+        }
+        
+        .audio-controls {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+            gap: 15px;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 12px 25px;
+            border-radius: 50px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .audio-controls button {
+            background: linear-gradient(45deg, var(--main-color), var(--secondary-color));
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            min-width: 120px;
+            justify-content: center;
+        }
+        
+        .audio-controls button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 15px var(--main-color);
+        }
+        
+        .photo-display {
+            position: absolute;
+            width: 100%;
+            height: 60%;
+            top: 20%;
+            pointer-events: none;
+            z-index: 5;
+        }
+        
+        .floating-photo {
+            position: absolute;
+            width: 200px;
+            height: 200px;
+            border-radius: 10px;
+            object-fit: cover;
+            border: 3px solid white;
+            cursor: pointer;
+            transition: all 0.5s ease;
+            box-shadow: 0 0 25px rgba(0, 0, 0, 0.7);
+            transform: rotate(5deg);
+            opacity: 0;
+            pointer-events: auto;
+            z-index: 6;
+            animation: floatPhoto 15s linear infinite;
+        }
+        
+        .floating-photo:hover {
+            transform: scale(1.1) rotate(0deg);
+            z-index: 10;
+            box-shadow: 0 0 30px var(--main-color);
+        }
+        
+        #volumeControl {
+            width: 100px;
+            cursor: pointer;
+            accent-color: var(--main-color);
+        }
+        
+        .visualizer {
+            position: fixed;
+            bottom: 80px;
+            left: 0;
+            width: 100%;
+            height: 120px;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            gap: 4px;
+            z-index: 1;
+            pointer-events: none;
+        }
+        
+        .bar {
+            width: 10px;
+            min-height: 1px;
+            background: linear-gradient(to top, var(--main-color), var(--secondary-color));
+            border-radius: 5px 5px 0 0;
+            transition: height 0.05s ease-out;
+        }
+        
+        .emoji-dancer {
+            position: absolute;
+            font-size: 2rem;
+            opacity: 0;
+            z-index: 5;
+            animation: emojiFloat linear forwards;
+            user-select: none;
+            text-shadow: var(--text-glow);
+            pointer-events: none;
+        }
+        
+        .cumbia-dancer {
+            position: absolute;
+            width: 100px;
+            height: 100px;
+            background-size: contain;
+            background-repeat: no-repeat;
+            z-index: 10;
+            opacity: 0;
+            pointer-events: none;
+        }
+        
+        .particle {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, var(--main-color), var(--secondary-color));
+            pointer-events: none;
+            z-index: 3;
+            opacity: 0.7;
+            box-shadow: 0 0 10px var(--main-color);
+        }
+        
+        .song-indicator {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 14px;
+            z-index: 20;
+            pointer-events: none;
+        }
+        
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        
+        @keyframes emojiFloat {
+            0% { transform: translateY(100vh) rotate(0deg) scale(0.5); opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { transform: translateY(-20vh) rotate(360deg) scale(1.2); opacity: 0; }
+        }
+        
+        @keyframes logoPulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.15); }
+            100% { transform: scale(1); }
+        }
+        
+        @keyframes cumbiaDance {
+            0% { transform: translateX(-100px) rotate(-20deg); opacity: 0; }
+            20% { transform: translateX(0) rotate(0deg); opacity: 1; }
+            40% { transform: translateX(50px) rotate(20deg); }
+            60% { transform: translateX(0) rotate(0deg); }
+            80% { transform: translateX(-50px) rotate(-20deg); }
+            100% { transform: translateX(100px) rotate(20deg); opacity: 0; }
+        }
+        
+        @keyframes cumbiaSlide {
+            0% { transform: translateY(0) rotate(0deg); }
+            25% { transform: translateY(-20px) rotate(10deg); }
+            50% { transform: translateY(0) rotate(0deg); }
+            75% { transform: translateY(20px) rotate(-10deg); }
+            100% { transform: translateY(0) rotate(0deg); }
+        }
+        
+        @keyframes floatPhoto {
+            0% { transform: translate(0, 0) rotate(5deg); }
+            25% { transform: translate(20px, 20px) rotate(10deg); }
+            50% { transform: translate(0, 40px) rotate(5deg); }
+            75% { transform: translate(-20px, 20px) rotate(0deg); }
+            100% { transform: translate(0, 0) rotate(5deg); }
+        }
+        
+        @keyframes photoEntrance {
+            0% { transform: scale(0) rotate(-30deg); opacity: 0; }
+            100% { transform: scale(1) rotate(5deg); opacity: 1; }
+        }
+        
+        @keyframes photoExit {
+            0% { transform: scale(1) rotate(5deg); opacity: 1; }
+            100% { transform: scale(0) rotate(30deg); opacity: 0; }
+        }
+        
+        @keyframes particleFloat {
+            0% { transform: translateY(0) scale(1); opacity: 0.7; }
+            50% { transform: translateY(-20px) scale(1.2); opacity: 1; }
+            100% { transform: translateY(-40px) scale(0.5); opacity: 0; }
+        }
+        
+        @media (max-width: 768px) {
+            .logo {
+                width: 200px;
+                height: 200px;
+            }
+            
+            .title {
+                font-size: 2.5rem;
+                padding: 0 10px;
+            }
+            
+            .subtitle {
+                font-size: 1.2rem;
+            }
+            
+            .song-info {
+                font-size: 1rem;
+            }
+            
+            .audio-controls {
+                flex-wrap: wrap;
+                width: 90%;
+                padding: 10px;
+                bottom: 10px;
+            }
+            
+            .audio-controls button {
+                min-width: 100px;
+                padding: 8px 15px;
+                font-size: 0.9rem;
+            }
+            
+            .floating-photo {
+                width: 120px;
+                height: 120px;
+            }
+            
+            .visualizer {
+                height: 80px;
+                bottom: 70px;
+            }
+        }
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap" rel="stylesheet">
+</head>
+<body>
+    <video autoplay muted loop class="video-background" id="backgroundVideo">
+        <source src="personbai.mp4" type="video/mp4">
+    </video>
+    
+    <div class="content-wrapper">
+        <div class="header">
+            <div class="logo-container">
+                <img src="Logo1.png" alt="Frikykumbia Logo" class="logo" id="logo">
+            </div>
+            <div class="title-container">
+                <h1 class="title" id="animated-title">FRIKYKUMBIA</h1>
+                <div class="subtitle" id="subtitle">¡La fiesta más animada!</div>
+                <div class="song-info" id="songInfo">Canción: Frikykumbia</div>
+            </div>
+        </div>
+        
+        <div class="photo-display" id="photoDisplay">
+            <!-- Las fotos flotantes se generarán dinámicamente -->
+        </div>
+        
+        <div class="visualizer" id="visualizer"></div>
+        
+        <div class="audio-controls">
+            <button id="prevBtn">⏮ ANTERIOR</button>
+            <button id="playBtn">▶️ REPRODUCIR</button>
+            <button id="pauseBtn">⏸ PAUSAR</button>
+            <button id="stopBtn">⏹ DETENER</button>
+            <button id="nextBtn">⏭ SIGUIENTE</button>
+            <input type="range" id="volumeControl" min="0" max="1" step="0.1" value="0.7">
+        </div>
+    </div>
+    
+    <audio id="audioPlayer" preload="auto"></audio>
+    
+    <script>
+        // Configuración de canciones (cada canción usa una imagen diferente)
+        const songs = [
+            { 
+                id: 1, 
+                name: "Frikykumbia", 
+                file: "frikykumbia.mp3", 
+                images: ["imagen1.jpg", "imagen5.jpg", "imagen9.jpg", "imagen13.jpg"],
+                colors: ["#ff00ff", "#00ffff", "#ff00aa", "#00ffaa"]
+            },
+            { 
+                id: 2, 
+                name: "Ritmo Friki", 
+                file: "cancion2.mp3", 
+                images: ["imagen2.jpg", "imagen6.jpg", "imagen10.jpg", "imagen14.jpg"],
+                colors: ["#ff9900", "#00ff99", "#9900ff", "#ff0099"]
+            },
+            { 
+                id: 3, 
+                name: "Baila Conmigo", 
+                file: "cancion3.mp3", 
+                images: ["imagen3.jpg", "imagen7.jpg", "imagen11.jpg", "imagen15.jpg"],
+                colors: ["#00ccff", "#ffcc00", "#cc00ff", "#00ffcc"]
+            },
+            { 
+                id: 4, 
+                name: "HAZME TUYO", 
+                file: "cancion4.mp3", 
+                images: ["imagen4.jpg", "imagen8.jpg", "imagen12.jpg", "imagen16.jpg"],
+                colors: ["#ff3366", "#33ff66", "#6633ff", "#ff6633"]
+            }
+        ];
+        
+        // Cache de elementos DOM
+        const elements = {
+            audioPlayer: document.getElementById('audioPlayer'),
+            playBtn: document.getElementById('playBtn'),
+            pauseBtn: document.getElementById('pauseBtn'),
+            stopBtn: document.getElementById('stopBtn'),
+            prevBtn: document.getElementById('prevBtn'),
+            nextBtn: document.getElementById('nextBtn'),
+            volumeControl: document.getElementById('volumeControl'),
+            visualizer: document.getElementById('visualizer'),
+            title: document.getElementById('animated-title'),
+            subtitle: document.getElementById('subtitle'),
+            songInfo: document.getElementById('songInfo'),
+            logo: document.getElementById('logo'),
+            backgroundVideo: document.getElementById('backgroundVideo'),
+            photoDisplay: document.getElementById('photoDisplay')
+        };
+        
+        // Configuración
+        const config = {
+            barCount: 50,
+            emojis: ['💃', '🕺', '👾', '🎮', '🤖', '👽', '🎧', '📱', '🌈', '✨'],
+            bassThreshold: 0.85,
+            emojiThreshold: 0.9,
+            currentSongIndex: 0,
+            floatingPhotos: [],
+            activePhotoIndex: 0,
+            maxParticles: 100,
+            particles: [],
+            maxPhotos: 8, // Número máximo de fotos visibles simultáneamente
+            photoIntervalTime: 2000 // Tiempo entre aparición de fotos (ms)
+        };
+        
+        // Estado de la aplicación
+        const state = {
+            audioContext: null,
+            analyser: null,
+            dataArray: null,
+            source: null,
+            isPlaying: false,
+            lastBassTime: 0,
+            bars: [],
+            photoInterval: null,
+            particleInterval: null,
+            photoTimers: []
+        };
+        
+        // Inicialización
+        function init() {
+            initVisualizer();
+            setupEventListeners();
+            animateTitleLetters();
+            preloadAssets();
+            loadSong(config.currentSongIndex);
+            startPhotoCycle();
+        }
+        
+        function initVisualizer() {
+            elements.visualizer.innerHTML = '';
+            state.bars = [];
+            
+            for (let i = 0; i < config.barCount; i++) {
+                const bar = document.createElement('div');
+                bar.className = 'bar';
+                elements.visualizer.appendChild(bar);
+                state.bars.push(bar);
+            }
+        }
+        
+        function createFloatingPhoto(imageUrl, color, songIndex, imageIndex) {
+            const photo = document.createElement('img');
+            photo.src = imageUrl;
+            photo.className = 'floating-photo';
+            photo.dataset.songIndex = songIndex;
+            photo.dataset.imageIndex = imageIndex;
+            
+            // Posición aleatoria inicial
+            const left = 5 + Math.random() * 70;
+            const top = 10 + Math.random() * 60;
+            photo.style.left = `${left}%`;
+            photo.style.top = `${top}%`;
+            
+            // Estilo especial para la foto
+            photo.style.borderColor = color;
+            photo.style.boxShadow = `0 0 30px ${color}`;
+            photo.style.zIndex = Math.floor(Math.random() * 10) + 5;
+            
+            // Animación de entrada
+            photo.style.animation = 'photoEntrance 0.5s forwards, floatPhoto 15s linear infinite';
+            
+            // Evento click para la foto
+            photo.addEventListener('click', () => {
+                // Obtener la canción asociada a esta imagen
+                const songIdx = parseInt(photo.dataset.songIndex);
+                
+                // Si es una canción diferente, cambiarla
+                if (songIdx !== config.currentSongIndex) {
+                    loadSong(songIdx);
+                    
+                    // Si no está reproduciendo, comenzar a reproducir
+                    if (!state.isPlaying) {
+                        if (!state.audioContext) setupAudioContext();
+                        elements.audioPlayer.play();
+                        elements.backgroundVideo.play();
+                        state.isPlaying = true;
+                        animate();
+                        
+                        setTimeout(() => {
+                            elements.subtitle.style.opacity = '1';
+                        }, 1200);
+                    }
+                }
+                
+                // Ocultar la foto con animación
+                photo.style.animation = 'photoExit 0.5s forwards';
+                
+                // Crear partículas al hacer clic
+                createParticles(20, photo.style.left, photo.style.top, color);
+                
+                // Eliminar la foto después de la animación
+                setTimeout(() => {
+                    if (photo.parentNode) {
+                        photo.parentNode.removeChild(photo);
+                    }
+                    config.floatingPhotos = config.floatingPhotos.filter(p => p !== photo);
+                }, 500);
+            });
+            
+            elements.photoDisplay.appendChild(photo);
+            config.floatingPhotos.push(photo);
+            
+            // Programar eliminación después de un tiempo
+            const timer = setTimeout(() => {
+                if (photo.parentNode) {
+                    photo.style.animation = 'photoExit 0.5s forwards';
+                    setTimeout(() => {
+                        photo.parentNode.removeChild(photo);
+                        config.floatingPhotos = config.floatingPhotos.filter(p => p !== photo);
+                    }, 500);
+                }
+            }, 8000 + Math.random() * 7000); // Entre 8-15 segundos
+            
+            state.photoTimers.push(timer);
+            
+            return photo;
+        }
+        
+        function cyclePhotos() {
+            // Seleccionar una canción aleatoria
+            const randomSongIndex = Math.floor(Math.random() * songs.length);
+            const song = songs[randomSongIndex];
+            
+            // Seleccionar una imagen aleatoria de esa canción
+            const randomImageIndex = Math.floor(Math.random() * song.images.length);
+            
+            // Si ya hay demasiadas fotos, eliminar la más antigua
+            if (config.floatingPhotos.length >= config.maxPhotos) {
+                const oldestPhoto = config.floatingPhotos.shift();
+                if (oldestPhoto && oldestPhoto.parentNode) {
+                    oldestPhoto.style.animation = 'photoExit 0.5s forwards';
+                    setTimeout(() => {
+                        oldestPhoto.parentNode.removeChild(oldestPhoto);
+                    }, 500);
+                }
+            }
+            
+            // Crear nueva foto
+            createFloatingPhoto(
+                song.images[randomImageIndex],
+                song.colors[randomImageIndex],
+                randomSongIndex,
+                randomImageIndex
+            );
+        }
+        
+        function startPhotoCycle() {
+            // Limpiar timers anteriores
+            state.photoTimers.forEach(timer => clearTimeout(timer));
+            state.photoTimers = [];
+            
+            // Limpiar fotos existentes
+            elements.photoDisplay.innerHTML = '';
+            config.floatingPhotos = [];
+            
+            // Crear algunas fotos iniciales
+            for (let i = 0; i < Math.min(5, config.maxPhotos); i++) {
+                setTimeout(() => cyclePhotos(), i * 1000);
+            }
+            
+            // Configurar intervalo para nuevas fotos
+            if (state.photoInterval) clearInterval(state.photoInterval);
+            state.photoInterval = setInterval(cyclePhotos, config.photoIntervalTime);
+        }
+        
+        function createParticles(count, x, y, color) {
+            for (let i = 0; i < count; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                
+                // Posición inicial (convertir % a px si es necesario)
+                let posX, posY;
+                if (x.includes('%')) {
+                    posX = (parseFloat(x) / 100) * window.innerWidth;
+                } else {
+                    posX = parseFloat(x);
+                }
+                
+                if (y.includes('%')) {
+                    posY = (parseFloat(y) / 100) * window.innerHeight;
+                } else {
+                    posY = parseFloat(y);
+                }
+                
+                particle.style.left = `${posX + Math.random() * 50 - 25}px`;
+                particle.style.top = `${posY + Math.random() * 50 - 25}px`;
+                
+                // Tamaño aleatorio
+                const size = 5 + Math.random() * 10;
+                particle.style.width = `${size}px`;
+                particle.style.height = `${size}px`;
+                
+                // Color
+                if (color) {
+                    particle.style.background = color;
+                    particle.style.boxShadow = `0 0 10px ${color}`;
+                }
+                
+                // Animación
+                const duration = 1 + Math.random() * 2;
+                particle.style.animation = `particleFloat ${duration}s forwards`;
+                
+                document.body.appendChild(particle);
+                config.particles.push(particle);
+                
+                // Eliminar después de la animación
+                setTimeout(() => {
+                    if (particle.parentNode) {
+                        particle.parentNode.removeChild(particle);
+                    }
+                    config.particles = config.particles.filter(p => p !== particle);
+                }, duration * 1000);
+            }
+        }
+        
+        function loadSong(index) {
+            config.currentSongIndex = index;
+            const song = songs[index];
+            
+            // Actualizar la interfaz
+            elements.songInfo.textContent = `Canción: ${song.name}`;
+            elements.audioPlayer.src = song.file;
+            
+            // Si ya estaba reproduciendo, continúa
+            if (state.isPlaying) {
+                elements.audioPlayer.play();
+            }
+            
+            // Animación de cambio de canción
+            playCumbiaAnimation();
+        }
+        
+        function playNextSong() {
+            const nextIndex = (config.currentSongIndex + 1) % songs.length;
+            loadSong(nextIndex);
+        }
+        
+        function playPrevSong() {
+            const prevIndex = (config.currentSongIndex - 1 + songs.length) % songs.length;
+            loadSong(prevIndex);
+        }
+        
+        function playCumbiaAnimation() {
+            // Animación del logo
+            elements.logo.style.animation = 'none';
+            void elements.logo.offsetWidth;
+            elements.logo.style.animation = 'cumbiaSlide 0.5s ease-in-out 3';
+            
+            // Crear bailarines de cumbia
+            for (let i = 0; i < 3; i++) {
+                setTimeout(() => {
+                    const dancer = document.createElement('div');
+                    dancer.className = 'cumbia-dancer';
+                    
+                    // Usar una imagen aleatoria de la canción actual
+                    const currentSong = songs[config.currentSongIndex];
+                    const randomImageIndex = Math.floor(Math.random() * currentSong.images.length);
+                    dancer.style.backgroundImage = `url(${currentSong.images[randomImageIndex]})`;
+                    
+                    // Posición aleatoria
+                    const top = 20 + Math.random() * 60;
+                    dancer.style.top = `${top}vh`;
+                    dancer.style.left = i % 2 === 0 ? '-100px' : 'calc(100% + 100px)';
+                    
+                    // Estilo
+                    const size = 100 + Math.random() * 100;
+                    dancer.style.width = `${size}px`;
+                    dancer.style.height = `${size}px`;
+                    dancer.style.borderRadius = '50%';
+                    dancer.style.border = '3px solid white';
+                    dancer.style.boxShadow = `0 0 20px ${currentSong.colors[randomImageIndex]}`;
+                    
+                    // Animación
+                    dancer.style.animation = i % 2 === 0 
+                        ? 'cumbiaDance 2s ease-in-out forwards' 
+                        : 'cumbiaDance 2s ease-in-out reverse forwards';
+                    
+                    document.body.appendChild(dancer);
+                    
+                    // Eliminar después de la animación
+                    setTimeout(() => {
+                        dancer.remove();
+                    }, 2000);
+                    
+                    // Crear partículas cuando aparecen los bailarines
+                    if (i === 1) {
+                        createParticles(30, dancer.style.left, dancer.style.top, currentSong.colors[randomImageIndex]);
+                    }
+                }, i * 300);
+            }
+        }
+        
+        function setupAudioContext() {
+            state.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            state.analyser = state.audioContext.createAnalyser();
+            state.analyser.fftSize = 128;
+            
+            state.source = state.audioContext.createMediaElementSource(elements.audioPlayer);
+            state.source.connect(state.analyser);
+            state.analyser.connect(state.audioContext.destination);
+            
+            state.dataArray = new Uint8Array(state.analyser.frequencyBinCount);
+        }
+        
+        function animate() {
+            if (!state.isPlaying) return;
+            
+            requestAnimationFrame(animate);
+            
+            state.analyser.getByteFrequencyData(state.dataArray);
+            
+            for (let i = 0; i < state.bars.length; i++) {
+                const index = Math.floor(i * (state.dataArray.length / state.bars.length));
+                const value = state.dataArray[index] / 255;
+                const height = 10 + value * 110;
+                
+                state.bars[i].style.height = `${height}px`;
+                
+                // Cambiar color de las barras según la frecuencia
+                const hue = (index / state.dataArray.length) * 360;
+                state.bars[i].style.background = `linear-gradient(to top, hsl(${hue}, 100%, 50%), hsl(${(hue + 60) % 360}, 100%, 50%)`;
+            }
+            
+            const bassValue = state.dataArray[5] / 255;
+            const midValue = state.dataArray[20] / 255;
+            const highValue = state.dataArray[40] / 255;
+            const currentTime = Date.now();
+            
+            if (bassValue > config.bassThreshold && currentTime - state.lastBassTime > 300) {
+                state.lastBassTime = currentTime;
+                elements.logo.style.animation = 'none';
+                void elements.logo.offsetWidth;
+                elements.logo.style.animation = 'logoPulse 0.5s ease-out';
+                
+                // Crear partículas en el logo con el ritmo
+                const logoRect = elements.logo.getBoundingClientRect();
+                const currentSong = songs[config.currentSongIndex];
+                const randomColorIndex = Math.floor(Math.random() * currentSong.colors.length);
+                createParticles(10, 
+                               logoRect.left + logoRect.width/2, 
+                               logoRect.top + logoRect.height/2, 
+                               currentSong.colors[randomColorIndex]);
+                
+                // Cambiar color del título con el ritmo
+                elements.title.style.background = `linear-gradient(45deg, ${currentSong.colors[randomColorIndex]}, ${currentSong.colors[(randomColorIndex + 1) % currentSong.colors.length]})`;
+            }
+            
+            elements.backgroundVideo.playbackRate = 1 + (bassValue * 0.3);
+            
+            if (highValue > config.emojiThreshold && Math.random() > 0.7) {
+                createDancingEmoji();
+            }
+            
+            // Crear partículas aleatorias con el ritmo
+            if (midValue > 0.7 && Math.random() > 0.8 && config.particles.length < config.maxParticles) {
+                createRandomParticles(midValue);
+            }
+            
+            // Cambiar color del logo con el ritmo
+            elements.logo.style.filter = `drop-shadow(0 0 15px hsl(${midValue * 360}, 100%, 50%))`;
+            
+            // Cambiar opacidad del subtítulo con el ritmo
+            elements.subtitle.style.opacity = `${0.7 + (highValue * 0.3)}`;
+        }
+        
+        function createRandomParticles(intensity) {
+            const count = Math.floor(intensity * 5);
+            const currentSong = songs[config.currentSongIndex];
+            const colorIndex = Math.floor(Math.random() * currentSong.colors.length);
+            const color = currentSong.colors[colorIndex];
+            
+            for (let i = 0; i < count; i++) {
+                const x = Math.random() * window.innerWidth;
+                const y = window.innerHeight + Math.random() * 100;
+                createParticles(1, x, y, color);
+            }
+        }
+        
+        function createDancingEmoji() {
+            const emoji = document.createElement('div');
+            emoji.className = 'emoji-dancer';
+            emoji.textContent = config.emojis[Math.floor(Math.random() * config.emojis.length)];
+            emoji.style.left = `${10 + Math.random() * 80}vw`;
+            emoji.style.animationDuration = `${2 + Math.random() * 3}s`;
+            
+            // Usar color de la canción actual
+            const currentSong = songs[config.currentSongIndex];
+            const colorIndex = Math.floor(Math.random() * currentSong.colors.length);
+            emoji.style.color = currentSong.colors[colorIndex];
+            
+            document.body.appendChild(emoji);
+            
+            // Crear partículas cuando aparece el emoji
+            createParticles(5, emoji.style.left, '100vh', emoji.style.color);
+            
+            setTimeout(() => {
+                emoji.remove();
+            }, parseFloat(emoji.style.animationDuration) * 1000);
+        }
+        
+        function animateTitleLetters() {
+            const text = elements.title.textContent;
+            elements.title.textContent = '';
+            
+            for (let i = 0; i < text.length; i++) {
+                setTimeout(() => {
+                    const span = document.createElement('span');
+                    span.textContent = text[i];
+                    span.style.display = 'inline-block';
+                    span.style.transform = 'translateY(-30px)';
+                    span.style.opacity = '0';
+                    span.style.transition = `all 0.3s ease-out ${i * 0.05}s`;
+                    elements.title.appendChild(span);
+                    
+                    setTimeout(() => {
+                        span.style.transform = 'translateY(0)';
+                        span.style.opacity = '1';
+                    }, 50);
+                }, i * 100);
+            }
+        }
+        
+        function preloadAssets() {
+            // Precargar logo
+            new Image().src = 'Logo1.png';
+            
+            // Precargar imágenes de canciones
+            songs.forEach(song => {
+                song.images.forEach(img => {
+                    new Image().src = img;
+                });
+            });
+            
+            // Precargar video de fondo
+            elements.backgroundVideo.load();
+            
+            // Precargar canciones
+            songs.forEach(song => {
+                const audio = new Audio();
+                audio.src = song.file;
+            });
+        }
+        
+        function setupEventListeners() {
+            elements.playBtn.addEventListener('click', () => {
+                if (!state.isPlaying) {
+                    if (!state.audioContext) setupAudioContext();
+                    elements.audioPlayer.play();
+                    elements.backgroundVideo.play();
+                    state.isPlaying = true;
+                    animate();
+                    
+                    setTimeout(() => {
+                        elements.subtitle.style.opacity = '1';
+                    }, 1200);
+                }
+            });
+            
+            elements.pauseBtn.addEventListener('click', () => {
+                if (state.isPlaying) {
+                    elements.audioPlayer.pause();
+                    elements.backgroundVideo.pause();
+                    state.isPlaying = false;
+                }
+            });
+            
+            elements.stopBtn.addEventListener('click', () => {
+                elements.audioPlayer.pause();
+                elements.audioPlayer.currentTime = 0;
+                elements.backgroundVideo.pause();
+                elements.backgroundVideo.currentTime = 0;
+                state.isPlaying = false;
+                elements.subtitle.style.opacity = '0';
+                elements.backgroundVideo.playbackRate = 1;
+            });
+            
+            elements.nextBtn.addEventListener('click', playNextSong);
+            elements.prevBtn.addEventListener('click', playPrevSong);
+            
+            elements.volumeControl.addEventListener('input', () => {
+                const volume = elements.volumeControl.value;
+                elements.audioPlayer.volume = volume;
+                elements.backgroundVideo.volume = volume;
+            });
+            
+            // Cuando termina una canción, pasar a la siguiente
+            elements.audioPlayer.addEventListener('ended', playNextSong);
+            
+            // Crear partículas al hacer clic en cualquier parte
+            document.addEventListener('click', (e) => {
+                if (state.isPlaying) {
+                    const currentSong = songs[config.currentSongIndex];
+                    const colorIndex = Math.floor(Math.random() * currentSong.colors.length);
+                    createParticles(15, e.clientX, e.clientY, currentSong.colors[colorIndex]);
+                }
+            });
+            
+            // Cambiar tamaño de las fotos con la rueda del mouse
+            document.addEventListener('wheel', (e) => {
+                if (e.ctrlKey) { // Solo si se mantiene Ctrl presionado
+                    e.preventDefault();
+                    const scaleFactor = e.deltaY > 0 ? 0.9 : 1.1;
+                    config.floatingPhotos.forEach(photo => {
+                        const currentWidth = parseFloat(photo.style.width || '200px');
+                        const currentHeight = parseFloat(photo.style.height || '200px');
+                        photo.style.width = `${currentWidth * scaleFactor}px`;
+                        photo.style.height = `${currentHeight * scaleFactor}px`;
+                    });
+                }
+            }, { passive: false });
+        }
+        
+        // Iniciar la aplicación
+        init();
+
+        
+        // ===== PROTECCIÓN CONTRA ACCESO AL CÓDIGO FUENTE =====
+        document.addEventListener("keydown", e => {
+            // Bloquear Ctrl+U
+            if (e.ctrlKey && e.key === "u") {
+                alert("🙅‍♂️ Ver código fuente no permitido");
+                e.preventDefault();
+            }
+            // Bloquear F12 y Ctrl+Shift+I
+            if (e.key === "F12" || (e.ctrlKey && e.shiftKey && e.key === "I")) {
+                e.preventDefault();
+                alert("Acceso restringido");
+            }
+        });
+
+        // Prevenir clic derecho
+        document.addEventListener("contextmenu", e => {
+            e.preventDefault();
+            alert("🙅‍♂️ Menú contextual deshabilitado");
+        });
+
+        // Bloquear arrastrar imágenes (opcional)
+        document.addEventListener("dragstart", e => {
+            if (e.target.tagName === "IMG") {
+                e.preventDefault();
+            }
+        });
+    </script>
+</body>
+</html>
